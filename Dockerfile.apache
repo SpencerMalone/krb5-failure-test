@@ -1,0 +1,25 @@
+FROM apache:custom
+
+RUN apt-get update && apt-get install -y libc-client-dev libz-dev unzip libkrb5-dev=1.15-1+deb9u1 && rm -r /var/lib/apt/lists/*
+RUN PHP_OPENSSL=yes docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap
+
+RUN apt-get update && apt-get install -y -q git rake ruby-ronn zlib1g-dev && apt-get clean
+
+# install composer
+RUN cd /usr/local/bin && curl -sS https://getcomposer.org/installer | php
+RUN cd /usr/local/bin && mv composer.phar composer
+
+RUN pecl install grpc-1.21.3
+
+#install protoc
+RUN mkdir -p /tmp/protoc && \
+    curl -L https://github.com/google/protobuf/releases/download/v3.2.0/protoc-3.2.0-linux-x86_64.zip > /tmp/protoc/protoc.zip && \
+    cd /tmp/protoc && \
+    unzip protoc.zip && \
+    echo hi && \
+    cp /tmp/protoc/bin/protoc /usr/local/bin && \
+    cd /tmp && \
+    rm -r /tmp/protoc && \
+    echo no && \
+    docker-php-ext-enable grpc

@@ -1,0 +1,16 @@
+version: '3'
+services:
+  apache:
+    build:
+      context: .
+      dockerfile: Dockerfile.apache
+    volumes:
+      - ./src:/var/www/html/
+    ports:
+      - "8090:80"
+    entrypoint: "sh -c 'apache2-foreground | grep krb'"
+  curl:
+    image: byrnedo/alpine-curl
+    entrypoint: "sh -c 'while true; do /usr/bin/curl -s apache:80 > /dev/null & done'"
+    links:
+    - apache
